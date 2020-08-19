@@ -1,0 +1,7 @@
+body {
+  background-color: var(--body-bg-color);
+}
+
+h1 {
+  color: var(--heading-1-color);
+}

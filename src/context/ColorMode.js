@@ -8,9 +8,6 @@ import {
 
 const ColorModeContext = createContext();
 
-const LIGHT = "light";
-const DARK = "dark";
-
 export function useColorMode() {
   const ctx = useContext(ColorModeContext);
 
@@ -21,14 +18,23 @@ export function useColorMode() {
   return ctx;
 }
 
+const LIGHT = "light";
+const DARK = "dark";
 const STORAGE_KEY = "colorMode";
-const BODY_CLASS_DARK = `color-mode-${DARK}`;
-const BODY_CLASS_LIGHT = `color-mode-${LIGHT}`;
+const BODY_CLASS_SEPARATOR = "-";
+const BODY_CLASS_PREFIX = `color${BODY_CLASS_SEPARATOR}mode`;
+const BODY_CLASS_DARK = `${BODY_CLASS_PREFIX}${BODY_CLASS_SEPARATOR}${DARK}`;
+const BODY_CLASS_LIGHT = `${BODY_CLASS_PREFIX}${BODY_CLASS_SEPARATOR}${LIGHT}`;
 
 const changeBodyClass = (mode) => {
   const nextIsLight = mode === LIGHT;
   const classToReplace = nextIsLight ? BODY_CLASS_DARK : BODY_CLASS_LIGHT;
   const newClass = nextIsLight ? BODY_CLASS_LIGHT : BODY_CLASS_DARK;
+
+  console.log({
+    classToReplace,
+    newClass,
+  });
 
   document.body.classList.replace(classToReplace, newClass);
 };
@@ -41,7 +47,7 @@ const securelyPersistColorMode = (mode) => {
   }
 };
 
-const map = {
+const colorMap = {
   [LIGHT]: {
     "--body-bg-color": "lightgray",
     "--heading-1-color": "purple",
@@ -53,7 +59,7 @@ const map = {
 };
 
 const swapCSSVariables = (mode) => {
-  const variables = map[mode];
+  const variables = colorMap[mode];
 
   Object.entries(variables).forEach(([variable, color]) => {
     document.documentElement.style.setProperty(variable, color);
@@ -62,15 +68,18 @@ const swapCSSVariables = (mode) => {
 
 export function InitializeColorMode() {
   const script = `
-  try {
-    const colorMode = localStorage.getItem('${STORAGE_KEY}');
+  (() => {
+    let colorMode = "${LIGHT}"
+    try {
+      colorMode = localStorage.getItem("${STORAGE_KEY}") === "${DARK}" ? "${DARK}" : "${LIGHT}"
+    } catch {}
 
-    if(colorMode) {
-      document.body.classList.add(colorMode === '${DARK}' ? '${BODY_CLASS_DARK}' : '${BODY_CLASS_LIGHT}')
-    }
-  } catch {
-    document.body.classList.add('${BODY_CLASS_LIGHT}')
-  }
+    document.body.classList.add("${BODY_CLASS_PREFIX}${BODY_CLASS_SEPARATOR}" + colorMode)
+
+    const colorMap = ${JSON.stringify(colorMap)}
+
+    eval(\`${swapCSSVariables.toString()}\`)(colorMode)
+  })();
   `;
 
   return <script dangerouslySetInnerHTML={{ __html: script }} />;

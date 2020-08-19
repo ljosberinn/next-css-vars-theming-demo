@@ -1,8 +1,8 @@
-import { useColorMode, useColorModeValue } from "../context/ColorMode";
+import { useColorMode } from "../context/ColorMode";
 import { FaSun, FaMoon } from "react-icons/fa";
 
 export function ColorModeSwitch() {
-  const { colorMode, toggleColorMode, isLight, isDark } = useColorMode();
+  const { colorMode, toggleColorMode, isLight } = useColorMode();
 
   return (
     <>

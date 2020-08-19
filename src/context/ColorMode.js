@@ -21,15 +21,9 @@ export function useColorMode() {
   return ctx;
 }
 
-export function useColorModeValue(light, dark) {
-  const { colorMode } = useColorMode();
-
-  return colorMode === LIGHT ? light : dark;
-}
-
 const STORAGE_KEY = "colorMode";
-const BODY_CLASS_DARK = "color-mode-dark";
-const BODY_CLASS_LIGHT = "color-mode-light";
+const BODY_CLASS_DARK = `color-mode-${DARK}`;
+const BODY_CLASS_LIGHT = `color-mode-${LIGHT}`;
 
 const changeBodyClass = (mode) => {
   const nextIsLight = mode === LIGHT;
@@ -45,8 +39,6 @@ const securelyPersistColorMode = (mode) => {
   } catch (error) {
     console.error(error);
   }
-
-  changeBodyClass(mode);
 };
 
 const map = {
@@ -101,14 +93,13 @@ export function ColorModeProvider({ children }) {
 
   useEffect(() => {
     securelyPersistColorMode(colorMode);
+    changeBodyClass(colorMode);
     swapCSSVariables(colorMode);
   }, [colorMode]);
 
   const value = {
     toggleColorMode,
     colorMode,
-    LIGHT,
-    DARK,
     isLight: colorMode === LIGHT,
     isDark: colorMode === DARK,
   };
